@@ -87,6 +87,16 @@ the streaming tables:
 
 ![AWS Glue Data Catalog tables](imgs/Glue%20Data%20Catalog.png)
 
+In the `g9-ais-project` bucket, the exported batch jobs use
+`bronze/ports_activity/ports/` and `bronze/ports_reference/` for source Parquet,
+and write cleaned Parquet to `silver/ports_activity/ports/` (partitioned by
+year and month) and `silver/ports_reference/`. The streaming path stores raw
+Kafka JSON under `bronze/` and Delta tables under `silver/`; the maintenance
+job targets `silver/positions` and `silver/vessels`.
+
+Glue crawlers register the datasets in the Glue Data Catalog from their
+configured S3 prefixes.
+
 ## Batch Ingestion & Orchestration (Airflow)
 
 Airflow runs locally in Docker Compose using a CeleryExecutor, PostgreSQL
@@ -258,7 +268,7 @@ In Snowflake, review and run the SQL in order:
    placeholders securely before execution.
 2. `snowflake/02_initial_load.sql` to create and initially populate the raw
    PortWatch tables and AIS Delta external tables.
-3. `snowflake/stored_procedurs.sql` to define the recent-window load
+3. `snowflake/stored_procedures.sql` to define the recent-window load
    procedures used by Airflow.
 
 Before loading reference rows, align the `PORTS_REF` COPY prefix in
